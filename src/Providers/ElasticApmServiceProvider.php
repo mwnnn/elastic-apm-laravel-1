@@ -8,8 +8,11 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Nipwaayoni\Agent;
+use Nipwaayoni\AgentBuilder;
 use Nipwaayoni\ElasticApmLaravel\Contracts\VersionResolver;
+use Nipwaayoni\Helper\Config;
 use Nipwaayoni\Helper\Timer;
+use Psr\Container\ContainerInterface;
 
 class ElasticApmServiceProvider extends ServiceProvider
 {
@@ -49,8 +52,10 @@ class ElasticApmServiceProvider extends ServiceProvider
         );
 
         $this->app->singleton(Agent::class, function ($app) {
-            return new Agent(
-                array_merge(
+            $container = resolve(ContainerInterface::class);
+
+            $builder = new AgentBuilder();
+            $builder->withConfig(new Config(array_merge(
                     [
                         'framework' => 'Laravel',
                         'frameworkVersion' => app()->version(),
@@ -63,7 +68,13 @@ class ElasticApmServiceProvider extends ServiceProvider
                     config('elastic-apm.env'),
                     config('elastic-apm.server')
                 )
-            );
+            ));
+
+            if ($container->has('ElasticApmHttpClient')) {
+                $builder->withHttpClient($container->get('ElasticApmHttpClient'));
+            }
+
+            return $builder->make();
         });
 
         $this->startTime = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
