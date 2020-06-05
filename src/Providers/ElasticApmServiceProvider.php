@@ -57,21 +57,35 @@ class ElasticApmServiceProvider extends ServiceProvider
             $builder = new AgentBuilder();
             $builder->withConfig(new Config(array_merge(
                     [
+                        'active' => config('elastic-apm.active'),
                         'framework' => 'Laravel',
                         'frameworkVersion' => app()->version(),
                     ],
-                    [
-                        'active' => config('elastic-apm.active'),
-                        'httpClient' => config('elastic-apm.httpClient'),
-                    ],
                     $this->getAppConfig(),
-                    config('elastic-apm.env'),
                     config('elastic-apm.server')
                 )
             ));
 
+            $builder->withEnvData(config('elastic-apm.env'));
+
+            if ($container->has('ElasticApmEventFactory')) {
+                $builder->withEventFactory($container->get('ElasticApmEventFactory'));
+            }
+
+            if ($container->has('ElasticApmTransactionStore')) {
+                $builder->withTransactionStore($container->get('ElasticApmTransactionStore'));
+            }
+
             if ($container->has('ElasticApmHttpClient')) {
                 $builder->withHttpClient($container->get('ElasticApmHttpClient'));
+            }
+
+            if ($container->has('ElasticApmRequestFactory')) {
+                $builder->withRequestFactory($container->get('ElasticApmRequestFactory'));
+            }
+
+            if ($container->has('ElasticApmStreamFactory')) {
+                $builder->withStreamFactory($container->get('ElasticApmStreamFactory'));
             }
 
             return $builder->make();
