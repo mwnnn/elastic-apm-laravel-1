@@ -55,15 +55,16 @@ class ElasticApmServiceProvider extends ServiceProvider
             $container = resolve(ContainerInterface::class);
 
             $builder = new AgentBuilder();
-            $builder->withConfig(new Config(array_merge(
-                    [
+            $builder->withConfig(new Config(
+                array_merge(
+                [
                         'active' => config('elastic-apm.active'),
                         'framework' => 'Laravel',
                         'frameworkVersion' => app()->version(),
                     ],
-                    $this->getAppConfig(),
-                    config('elastic-apm.server')
-                )
+                $this->getAppConfig(),
+                config('elastic-apm.server')
+            )
             ));
 
             $builder->withEnvData(config('elastic-apm.env'));
