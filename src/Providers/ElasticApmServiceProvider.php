@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
 use Nipwaayoni\Agent;
 use Nipwaayoni\AgentBuilder;
+use Nipwaayoni\Config;
 use Nipwaayoni\ElasticApmLaravel\Contracts\VersionResolver;
-use Nipwaayoni\Helper\Config;
 use Nipwaayoni\Helper\Timer;
 use Psr\Container\ContainerInterface;
 
@@ -89,7 +89,7 @@ class ElasticApmServiceProvider extends ServiceProvider
                 $builder->withStreamFactory($container->get('ElasticApmStreamFactory'));
             }
 
-            return $builder->make();
+            return $builder->build();
         });
 
         $this->startTime = $this->app['request']->server('REQUEST_TIME_FLOAT') ?? microtime(true);
